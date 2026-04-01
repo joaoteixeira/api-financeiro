@@ -13,14 +13,11 @@ namespace ApiFinanceiro.Controllers
     [ApiController]
     public class DespesaController : ControllerBase
     {
-        private readonly AppDbContext _context;
-
         private readonly DespesaService _service;
 
-       public DespesaController(DespesaService service, AppDbContext context)
+       public DespesaController(DespesaService service)
         {
             _service = service;
-            _context = context;
         }
 
         [HttpGet()]

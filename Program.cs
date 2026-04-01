@@ -1,4 +1,5 @@
 using ApiFinanceiro.DataContexts;
+using ApiFinanceiro.Profiles;
 using ApiFinanceiro.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<DespesaService>();
+builder.Services.AddAutoMapper(config => config.AddProfile<DespesaProfile>());
 
 var app = builder.Build();
 
