@@ -25,7 +25,9 @@ namespace ApiFinanceiro.Services
         {
             try
             {
-                return await _context.Despesas.ToListAsync();
+                return await _context.Despesas
+                    .Include(d => d.Categoria)
+                    .ToListAsync();
             }
             catch (Exception)
             {
@@ -37,6 +39,14 @@ namespace ApiFinanceiro.Services
         {
             try
             {
+                var categoriaExiste = await _context.Categorias.AnyAsync(x => x.Id == data.CategoriaId);
+
+                if(!categoriaExiste)
+                {
+                    throw new ErrorServiceException($"Categoria não encontrada",
+                        c => c.NotFound(new { message = $"Categoria #{data.CategoriaId} não encontrada" }));
+                }
+
                 var despesa = _mapper.Map<Despesa>(data);
 
                 await _context.Despesas.AddAsync(despesa);
@@ -60,7 +70,7 @@ namespace ApiFinanceiro.Services
                 if (despesa is null)
                 {
                     throw new ErrorServiceException($"Despesa ${id} não encontrada", 
-                        c => c.NotFound(new { message = $"Despesa ${id} não encontrada" }));
+                        c => c.NotFound(new { message = $"Despesa #{id} não encontrada" }));
                 }
 
                 return despesa;
@@ -71,11 +81,19 @@ namespace ApiFinanceiro.Services
             }
         }
 
-        public async Task<Despesa> Update(int id, DespesaUpdateDto despesaDto)
+        public async Task<Despesa> Update(int id, DespesaUpdateDto data)
         {
             try
             {
                 var despesa = await FindById(id);
+
+                var categoriaExiste = await _context.Categorias.AnyAsync(x => x.Id == data.CategoriaId);
+
+                if (!categoriaExiste)
+                {
+                    throw new ErrorServiceException($"Categoria não encontrada",
+                        c => c.NotFound(new { message = $"Categoria #{data.CategoriaId} não encontrada" }));
+                }
 
                 //var dataVencimento = new DateTime(despesa.DataVencimento.Year, despesa.DataVencimento.Month, despesa.DataVencimento.Day);
                 //var dataPagamento = new DateTime(despesaDto.DataPagamento.Year, despesaDto.DataPagamento.Month, despesaDto.DataPagamento.Day);
@@ -87,7 +105,7 @@ namespace ApiFinanceiro.Services
                 //        c => c.Conflict(new { message = "Somente é possível realizar o pagamento no dia de vencimento" }));
                 //}
 
-                _mapper.Map(despesaDto, despesa);
+                _mapper.Map(data, despesa);
 
                 _context.Despesas.Update(despesa);
                 await _context.SaveChangesAsync();

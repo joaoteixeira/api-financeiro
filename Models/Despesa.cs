@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ApiFinanceiro.Models
 {
@@ -12,9 +13,6 @@ namespace ApiFinanceiro.Models
         [Column("descricao")]
         public required string Descricao { get; set; }
 
-        [Column("categoria")]
-        public required string Categoria { get; set; }
-
         [Column("valor")]
         public required decimal Valor { get; set; }
 
@@ -26,5 +24,11 @@ namespace ApiFinanceiro.Models
 
         [Column("data_pagamento")]
         public DateTime? DataPagamento { get; set; }
+
+        [JsonIgnore]
+        [Column("categoria_id")]
+        public int? CategoriaId { get; set; }
+
+        public virtual Categoria? Categoria { get; set; }
     }
 }
