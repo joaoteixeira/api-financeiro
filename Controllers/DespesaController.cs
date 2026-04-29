@@ -89,6 +89,21 @@ namespace ApiFinanceiro.Controllers
             }
         }
 
+        [HttpPost("{id}/tags")]
+        public async Task<IActionResult> AddTags(int id, [FromBody] DespesaTagsDto tag)
+        {
+            try
+            {
+                var despesa = await _service.AddTags(id, tag);
+
+                return Ok(despesa);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> Remove(int id)
         {

@@ -6,6 +6,7 @@ using ApiFinanceiro.Models;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ApiFinanceiro.Services
 {
@@ -71,7 +72,7 @@ namespace ApiFinanceiro.Services
         {
             try
             {
-                var despesa = await _context.Despesas.FirstOrDefaultAsync(x => x.Id == id);
+                var despesa = await _context.Despesas.Include(d => d.Tags).FirstOrDefaultAsync(x => x.Id == id);
 
                 if (despesa is null)
                 {
@@ -125,6 +126,38 @@ namespace ApiFinanceiro.Services
             }
         }
 
+        public async Task<Despesa> AddTags(int id, DespesaTagsDto tag)
+        {
+            try
+            {
+                var despesa = await FindById(id);
+
+                var tags = await _context.Tags.Where(x => tag.Ids.Contains(x.Id)).ToListAsync();
+
+                if (tags.Count == 0)
+                {
+                    throw new ErrorServiceException($"Tags não encontrada",
+                        c => c.NotFound(new { message = $"Tags não encontrada" }));
+                }
+
+                foreach(Tag _tag in tags)
+                {
+                    if (despesa.Tags.Any(t => t.Id != _tag.Id))
+                    {
+                        despesa.Tags.Add(_tag);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return despesa;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task Remove(int id)
         {
             try
@@ -139,5 +172,7 @@ namespace ApiFinanceiro.Services
                 throw;
             }
         }
+
+        
     }
 }

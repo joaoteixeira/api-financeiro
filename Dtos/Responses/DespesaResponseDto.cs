@@ -15,5 +15,7 @@
         //public DateTime? DataPagamento { get; set; }
 
         public CategoriaResponseDto? Categoria { get; set; }
+
+        public ICollection<TagResponseDto> Tags { get; set; }
     }
 }

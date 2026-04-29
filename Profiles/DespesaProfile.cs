@@ -26,6 +26,8 @@ namespace ApiFinanceiro.Profiles
             CreateMap<Categoria, CategoriaResponseDto>();
 
             CreateMap<Despesa, DespesaResponseDto>();
+
+            CreateMap<Tag, TagResponseDto>();
         }
     }
 }

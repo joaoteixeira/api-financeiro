@@ -18,4 +18,10 @@ namespace ApiFinanceiro.Dtos
         [Required(ErrorMessage = "O campo DataVencimento é obrigatório")]
         public required DateOnly DataVencimento { get; set; }
     }
+
+    public class DespesaTagsDto
+    {
+        [Required(ErrorMessage = "Obrigatório o envio de uma tag")]
+        public required List<int> Ids { get; set; }
+    }
 }

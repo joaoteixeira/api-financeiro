@@ -29,5 +29,7 @@ namespace ApiFinanceiro.Models
         public int? CategoriaId { get; set; }
 
         public virtual Categoria? Categoria { get; set; }
+
+        public ICollection<Tag>? Tags { get; set; } = new List<Tag>();
     }
 }
