@@ -13,7 +13,6 @@ namespace ApiFinanceiro.Models
         [Column("descricao")]
         public required string Descricao { get; set; }
 
-        [JsonIgnore]
         public ICollection<Despesa>? Despesas { get; set; }
     }
 }

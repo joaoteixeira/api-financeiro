@@ -25,7 +25,6 @@ namespace ApiFinanceiro.Models
         [Column("data_pagamento")]
         public DateTime? DataPagamento { get; set; }
 
-        [JsonIgnore]
         [Column("categoria_id")]
         public int? CategoriaId { get; set; }
 
