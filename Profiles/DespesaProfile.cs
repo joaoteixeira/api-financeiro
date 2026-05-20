@@ -28,6 +28,8 @@ namespace ApiFinanceiro.Profiles
             CreateMap<Despesa, DespesaResponseDto>();
 
             CreateMap<Tag, TagResponseDto>();
+
+            CreateMap<UsuarioDto, Usuario>();
         }
     }
 }

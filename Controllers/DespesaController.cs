@@ -3,6 +3,7 @@ using ApiFinanceiro.Dtos;
 using ApiFinanceiro.Exceptions;
 using ApiFinanceiro.Models;
 using ApiFinanceiro.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ namespace ApiFinanceiro.Controllers
 {
     [Route("/despesas")]
     [ApiController]
+    [Authorize]
     public class DespesaController : ControllerBase
     {
         private readonly DespesaService _service;
