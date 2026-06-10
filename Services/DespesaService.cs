@@ -1,12 +1,13 @@
-﻿using ApiFinanceiro.DataContexts;
+﻿using ApiFinanceiro.Controllers.Filters;
+using ApiFinanceiro.DataContexts;
 using ApiFinanceiro.Dtos;
 using ApiFinanceiro.Dtos.Responses;
 using ApiFinanceiro.Exceptions;
+using ApiFinanceiro.Helpers.Paginated;
 using ApiFinanceiro.Models;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ApiFinanceiro.Services
 {
@@ -26,11 +27,13 @@ namespace ApiFinanceiro.Services
         {
             try
             {
+
                 //var list = await _context.Despesas
                 //    .Include(d => d.Categoria)
                 //    .ToListAsync();
 
                 //return _mapper.Map<ICollection<DespesaResponseDto>>(list);
+
 
                 return await _context.Despesas
                     .ProjectTo<DespesaResponseDto>(_mapper.ConfigurationProvider)
@@ -41,6 +44,32 @@ namespace ApiFinanceiro.Services
                 throw;
             }
         }
+
+        public async Task<PaginatedResponse<DespesaResponseDto>> FindAllV2(DespesaFilter filter)
+        {
+            try
+            {
+                var query = _context.Despesas.AsQueryable();
+
+                if(filter.Search is not null)
+                {
+                   query = query.Where(x => x.Descricao.Contains(filter.Search));
+                }
+
+                if(filter.Situacao is not null)
+                {
+                    query = query.Where(x => x.Situacao == filter.Situacao);
+                }
+            
+
+                return await Paginate<Despesa>.Set<DespesaResponseDto>(query, filter, _mapper);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         public async Task<Despesa> Create(DespesaDto data)
         {
@@ -142,7 +171,7 @@ namespace ApiFinanceiro.Services
 
                 foreach(Tag _tag in tags)
                 {
-                    if (despesa.Tags.Any(t => t.Id != _tag.Id))
+                    if (!despesa.Tags.Any(t => t.Id == _tag.Id))
                     {
                         despesa.Tags.Add(_tag);
                     }

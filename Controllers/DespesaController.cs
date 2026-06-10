@@ -1,8 +1,11 @@
-﻿using ApiFinanceiro.DataContexts;
+﻿using ApiFinanceiro.Controllers.Filters;
+using ApiFinanceiro.DataContexts;
 using ApiFinanceiro.Dtos;
 using ApiFinanceiro.Exceptions;
+using ApiFinanceiro.Helpers.Paginated;
 using ApiFinanceiro.Models;
 using ApiFinanceiro.Services;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +13,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ApiFinanceiro.Controllers
 {
-    [Route("/despesas")]
+    
     [ApiController]
-    [Authorize]
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
+    [Route("v{version:apiVersion}/despesas")]
+    //[Authorize]
     public class DespesaController : ControllerBase
     {
         private readonly DespesaService _service;
@@ -30,12 +36,29 @@ namespace ApiFinanceiro.Controllers
                 var despesas = await _service.FindAll();
 
                 return Ok(despesas);
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 return Problem(e.Message);
             }
-            
         }
+
+        [HttpGet()]
+        [MapToApiVersion("2.0")]
+        public async Task<IActionResult> FindAll([FromQuery] DespesaFilter filter)
+        {
+            try
+            {
+                var despesas = await _service.FindAllV2(filter);
+
+                return Ok(despesas);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> FindById(int id)

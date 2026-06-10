@@ -1,6 +1,7 @@
 using ApiFinanceiro.DataContexts;
 using ApiFinanceiro.Profiles;
 using ApiFinanceiro.Services;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,11 +12,12 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Adiciona serviços ao contêiner.
 
 var connectionString = builder.Configuration.GetConnectionString("mysql");
 builder.Services.AddDbContext<AppDbContext>(
     options => options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 32)))
+                        .UseSnakeCaseNamingConvention()
  );
 
 
@@ -25,6 +27,32 @@ builder.Services.AddControllers().AddJsonOptions(
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.WriteIndented = true;
     });
+
+/**
+ * Configuração de Versionamento de API
+ */
+builder.Services.AddApiVersioning(options =>
+{
+    // Versão padrão quando nenhuma é especificada (Fallback)
+    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+
+    // Usa automaticamente a DefaultApiVersion se o cliente não fornecer uma
+    options.AssumeDefaultVersionWhenUnspecified = true;
+
+    // Retorna as versões disponíveis/obsoletas nos cabeçalhos de resposta (api-supported-versions)
+    options.ReportApiVersions = true;
+
+    // Configura como a versão é lida da requisição (a partir do segmento da URL)
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+})
+.AddApiExplorer(options =>
+{
+    // Formata a string de versão como 'v1', 'v2', etc.
+    options.GroupNameFormat = "'v'VVV";
+
+    // Substitui o parâmetro de rota '{version:apiVersion}' automaticamente
+    options.SubstituteApiVersionInUrl = true;
+});
 
 /**
  * Config. de Verificação de Autenticação - JWT
@@ -47,16 +75,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Saiba mais sobre como configurar Swagger/OpenAPI em https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    //options.SwaggerDoc("v1", new OpenApiInfo
-    //{
-    //    Version = "v1",
-    //    Title = "API Financeira",
-    //    Description = "API de consumo para aplicação Financeira"
-    //});
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "API Financeira - V1",
+        Description = "API de consumo para aplicação Financeira"
+    });
+
+    options.SwaggerDoc("v2", new OpenApiInfo
+    {
+        Version = "v2",
+        Title = "API Financeira - V2",
+        Description = "API de consumo para aplicação Financeira"
+    });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
@@ -89,7 +124,7 @@ builder.Services.AddAutoMapper(config => config.AddProfile<DespesaProfile>());
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configura o pipeline de requisições HTTP.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
